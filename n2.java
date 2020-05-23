@@ -5,7 +5,9 @@ import java.net.*;
 public class n2 extends Thread {
     ArrayList<String> neinfo;// not necessary right now
     ArrayList<String> nextstop;// all next stop
-    String name;
+    ArrayList<String> stopinfo;//specific timetable of each next stop
+    ArrayList<String> routine;//the combined timetable for pass
+    String name;//self name
     int tcport;
     int udport;
 
@@ -15,9 +17,9 @@ public class n2 extends Thread {
         in.next();
         String stop;
         while (in.hasNext()) {
-            String sbbb = in.next();
-            String[] res = sbbb.split(",");
-            stop = res[res.length - 1];
+            String Cline = in.next();//current line
+            String[] res = Cline.split(",");
+            stop = res[res.length - 1];//next stop
             Boolean repeat = false;
             for (int i = 0; i < nextstop.size(); i++) {
                 if (nextstop.get(i).equals(stop)) {
@@ -27,6 +29,7 @@ public class n2 extends Thread {
             }
             if (!repeat) {
                 nextstop.add(stop);
+                stopinfo.add(Cline);
             }
         }
         in.close();
@@ -39,6 +42,7 @@ public class n2 extends Thread {
         udport = Integer.parseInt(arg[2]);
         neinfo = new ArrayList<String>();
         nextstop = new ArrayList<String>();
+        stopinfo = new ArrayList<String>();
         for (int i = 2; i < arg.length; i++) {
             neinfo.add(arg[i]);
         }
@@ -81,22 +85,23 @@ public class n2 extends Thread {
     public void UDPS() throws IOException{
         InetAddress loc = InetAddress.getLocalHost();
  
-         Scanner sc = new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
              
          DatagramSocket socket = new DatagramSocket();
              while(true) {
              
-            String line = sc.nextLine();
-             if("quit".equals(line)) {
-             break;
-             }
+                String line = sc.nextLine();
+                if("quit".equals(line)) {
+                break;
+                }
+
           for (int i = 0; i < neinfo.size()-1; i++) {
             DatagramPacket packet =
             new DatagramPacket(line.getBytes(), line.getBytes().length, loc, Integer.parseInt(neinfo.get(i)));//要改为邻居地址
              
          socket.send(packet);}
-            socket.close();  
-          }
+        }
+        socket.close();  
 
     }
 
@@ -105,7 +110,7 @@ public class n2 extends Thread {
         n2 station = new n2(args);
     
 
-        System.out.println(station.tcport);
+        System.out.println(station.stopinfo);
     }
 
 }

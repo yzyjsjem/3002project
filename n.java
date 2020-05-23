@@ -92,11 +92,12 @@ public class n2 extends Thread {
              }
           for (int i = 0; i < neinfo.size()-1; i++) {
             DatagramPacket packet =
-            new DatagramPacket(line.getBytes(), line.getBytes().length, loc, Integer.parseInt(neinfo.get(i)));//要改为邻居地址
+            new DatagramPacket(line.getBytes(), line.getBytes().length, loc, Integer.parseInt(neinfo.get(i)));//
              
          socket.send(packet);}
-            socket.close();  
-          }
+           }  
+           socket.close();  
+         
 
     }
 
