@@ -6,8 +6,9 @@ public class n2 extends Thread {
     ArrayList<String> neinfo;// not necessary right now
     ArrayList<String> nextstop;// all next stop
     ArrayList<String> stopinfo;//specific timetable of each next stop
-    ArrayList<String> routine;//the combined timetable for pass
+    String routine;//the combined timetable for pass
     String name;//self name
+    String end;//the last stop
     int tcport;
     int udport;
 
@@ -47,10 +48,10 @@ public class n2 extends Thread {
             neinfo.add(arg[i]);
         }
         getns(arg);
-        TCPS();
-        UDPR();
-        UDPS();
-
+           // TCPS();
+        //UDPR();//receiver
+        //UDPS();//sender
+    
     }
 
     public void TCPS() throws IOException {
@@ -62,7 +63,7 @@ public class n2 extends Thread {
         len = is.read(bys);
         InetAddress address = s.getInetAddress();
         System.out.println("sender:" + address);
-        System.out.println(new String(bys, 0, len));
+        System.out.println("the information is " + new String(bys, 0, len));//得到的终点站的信息为名字
         s.close();
     }
 
@@ -110,7 +111,7 @@ public class n2 extends Thread {
         n2 station = new n2(args);
     
 
-        System.out.println(station.stopinfo);
+        System.out.println(station.end);
     }
 
 }
