@@ -10,35 +10,14 @@ public class n2 extends Thread {
     String finalway;//the completed routine
     String name;//self name
     String end;//the last stop
-    int aim;
+    String arrivetime;//the arrive time recived
+    int ath;//arrive hour
+    int atm;//arrive minute
+    int aim;// udp port of the first server.
     int tcport;
     int udport;
 
-    // give next bus stop from timetable
-    public void getns(String[] arg) throws IOException {
-        Scanner in = new Scanner(new FileReader("tt-" + arg[0]));
-        in.next();
-        String stop;
-        while (in.hasNext()) {
-            String Cline = in.next();//current line
-            String[] res = Cline.split(",");
-            stop = res[res.length - 1];//next stop
-            Boolean repeat = false;
-            for (int i = 0; i < nextstop.size(); i++) {
-                if (nextstop.get(i).equals(stop)) {
-                    repeat = true;
-                    break;
-                }
-            }
-            if (!repeat) {
-                nextstop.add(stop);
-                stopinfo.add(Cline);
-            }
-        }
-        in.close();
-    }
-
-    // divide input information and store in order.
+   // divide input information and store in order.
     public n2(String[] arg) throws IOException {
         name = arg[0];
         tcport = Integer.parseInt(arg[1]);
@@ -50,15 +29,50 @@ public class n2 extends Thread {
         finalway="";
         end="";
         aim=0;
+        ath=0;//如果是初始站的话就要提前设置时间
+        atm=0;
         for (int i = 2; i < arg.length; i++) {
             neinfo.add(arg[i]);
         }
-        getns(arg);
         TCPS();
         UDPR();//receiver
+        getns(arg);
         UDPS();//sender
 
     }
+     // give next bus stop from timetable
+     public void getns(String[] arg) throws IOException {
+        Scanner in = new Scanner(new FileReader("tt-" + arg[0]));
+        in.next();
+        String stop;
+        while (in.hasNext()) {
+            String Cline = in.next();//current line
+            String[] res = Cline.split(",");
+            String startime = res[0];
+            String[] st=startime.split(":");
+            int sth=Integer.parseInt(st[0]);
+            int stm=Integer.parseInt(st[1]);
+
+            stop = res[res.length - 1];//next stop
+            if (sth>=ath&stm>=atm) {
+                Boolean repeat = false;
+                for (int i = 0; i < nextstop.size(); i++) {
+                    if (nextstop.get(i).equals(stop)) {
+                        repeat = true;
+                        break;
+                    }
+                }
+                if (!repeat) {
+                    nextstop.add(stop);
+                    stopinfo.add(Cline);
+                }
+            } else {
+                in.next();
+            }
+        }
+        in.close();
+    }
+
 
     public void TCPS() throws IOException {
         ServerSocket ss = new ServerSocket(tcport);
@@ -81,9 +95,12 @@ public class n2 extends Thread {
         socketUDP.receive(packet);
 
         byte[] arr = packet.getData();
-
-
-
+        routine=new String(arr);//get data set as routine
+        String[] arrive=routine.split(",");
+        arrivetime =arrive[arrive.length-2];//get the arrivetime
+        String[] at=arrivetime.split(":");
+        ath=Integer.parseInt(at[0]);
+        atm=Integer.parseInt(at[1]);
         socketUDP.close();
     }
 
@@ -112,7 +129,7 @@ public class n2 extends Thread {
              socket.send(packet);}
             socket.close();  
 
-
+//忘记考虑时间问题了
         } else if (自己接的上，下一站包括终点站 缝合之后routine 分隔出头两个，第一个取出为目标，后面一堆发送) {
             for (int i = 0; i < nextstop.size(); i++) {
                 if (nextstop.get(i)==end) {
@@ -130,7 +147,7 @@ public class n2 extends Thread {
         socket.send(packet);
         socket.close();  
             //routine 开始分割发送后半部分
-        } else //接的上，接上自己的然后发送 可能需要两个for loop  一个i一个j
+        } else //接的上，接上自己的然后发送 可能需要两个for loop  一个i一个j时间没有考虑
         {
             for (int i = 0; i < nextstop.size(); i++) {
                 routine=routine+stopinfo.get(i);

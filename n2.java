@@ -9,6 +9,7 @@ public class n2 extends Thread {
     String routine;//the combined timetable for pass
     String name;//self name
     String end;//the last stop
+    int aim;
     int tcport;
     int udport;
 
@@ -20,17 +21,27 @@ public class n2 extends Thread {
         while (in.hasNext()) {
             String Cline = in.next();//current line
             String[] res = Cline.split(",");
+            String startime = res[0];
+            String[] st=startime.split(":");
+            int sth=Integer.parseInt(st[0]);
+            int stm=Integer.parseInt(st[1]);
+
             stop = res[res.length - 1];//next stop
-            Boolean repeat = false;
-            for (int i = 0; i < nextstop.size(); i++) {
-                if (nextstop.get(i).equals(stop)) {
-                    repeat = true;
-                    break;
+            if (sth<7) {
+                in.next();
+            } else {
+                Boolean repeat = false;
+                for (int i = 0; i < nextstop.size(); i++) {
+                    if (nextstop.get(i).equals(stop)) {
+                        repeat = true;
+                        break;
+                    }
                 }
-            }
-            if (!repeat) {
-                nextstop.add(stop);
-                stopinfo.add(Cline);
+                if (!repeat) {
+                    nextstop.add(stop);
+                    stopinfo.add(Cline);
+                }
+                
             }
         }
         in.close();
@@ -47,13 +58,13 @@ public class n2 extends Thread {
         for (int i = 2; i < arg.length; i++) {
             neinfo.add(arg[i]);
         }
-        getns(arg);
-           // TCPS();
+        //getns(arg);
+        TCPS();
         //UDPR();//receiver
         //UDPS();//sender
     
     }
-
+//拔出end
     public void TCPS() throws IOException {
         ServerSocket ss = new ServerSocket(tcport);
         Socket s = ss.accept();
@@ -109,9 +120,8 @@ public class n2 extends Thread {
     public static void main(String[] args) throws IOException {
 
         n2 station = new n2(args);
-    
-
         System.out.println(station.end);
+     
     }
 
 }
