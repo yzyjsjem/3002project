@@ -13,6 +13,7 @@ public class n2 extends Thread {
     int tcport;
     int udport;
 
+
     // give next bus stop from timetable
     public void getns(String[] arg) throws IOException {
         Scanner in = new Scanner(new FileReader("tt-" + arg[0]));
@@ -70,11 +71,13 @@ public class n2 extends Thread {
         Socket s = ss.accept();
         InputStream is = s.getInputStream();
         byte[] bys = new byte[1024];
-        int len;
-        len = is.read(bys);
-        InetAddress address = s.getInetAddress();
-        System.out.println("sender:" + address);
-        System.out.println("the information is " + new String(bys, 0, len));//得到的终点站的信息为名字
+        
+        is.read(bys);
+        String browser= new String(bys);
+        String[]browser2=browser.split("to=");
+        String browser3=browser2[1];
+        String[] browser4 = browser3.split(" HTTP/1.1");
+        end =browser4[0];
         s.close();
     }
 
@@ -120,7 +123,7 @@ public class n2 extends Thread {
     public static void main(String[] args) throws IOException {
 
         n2 station = new n2(args);
-        System.out.println(station.end);
+        System.out.println("what i get is "+station.end);
      
     }
 

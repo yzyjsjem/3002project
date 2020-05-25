@@ -2,7 +2,7 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
-public class n2 extends Thread {
+public class n extends Thread {
     ArrayList<String> neinfo;// not necessary right now
     ArrayList<String> nextstop;// all next stop
     ArrayList<String> stopinfo;//specific timetable of each next stop
@@ -11,6 +11,7 @@ public class n2 extends Thread {
     String name;//self name
     String end;//the last stop
     String arrivetime;//the arrive time recived
+    String arrivestop;//the arrivestop get from routine
     int ath;//arrive hour
     int atm;//arrive minute
     int aim;// udp port of the first server.
@@ -18,7 +19,7 @@ public class n2 extends Thread {
     int udport;
 
    // divide input information and store in order.
-    public n2(String[] arg) throws IOException {
+    public n(String[] arg) throws IOException {
         name = arg[0];
         tcport = Integer.parseInt(arg[1]);
         udport = Integer.parseInt(arg[2]);
@@ -34,10 +35,10 @@ public class n2 extends Thread {
         for (int i = 2; i < arg.length; i++) {
             neinfo.add(arg[i]);
         }
-        TCPS();
-        UDPR();//receiver
+        //TCPS();
+        //UDPR();//receiver
         getns(arg);
-        UDPS();//sender
+        //UDPS();//sender
 
     }
      // give next bus stop from timetable
@@ -79,11 +80,13 @@ public class n2 extends Thread {
         Socket s = ss.accept();
         InputStream is = s.getInputStream();
         byte[] bys = new byte[1024];
-        int len;
-        len = is.read(bys);
-        InetAddress address = s.getInetAddress();
-        System.out.println("sender:" + address);
-        System.out.println(new String(bys, 0, len));//得到的终点站的信息为名字
+        
+        is.read(bys);
+        String browser= new String(bys);
+        String[]browser2=browser.split("to=");
+        String browser3=browser2[1];
+        String[] browser4 = browser3.split(" HTTP/1.1");
+        end =browser4[0];
         s.close();
     }
 //............................................................................................................
@@ -98,6 +101,8 @@ public class n2 extends Thread {
         routine=new String(arr);//get data set as routine
         String[] arrive=routine.split(",");
         arrivetime =arrive[arrive.length-2];//get the arrivetime
+        arrivestop = arrive[arrive.length-1];
+        end = arrive[1];//get the end information
         String[] at=arrivetime.split(":");
         ath=Integer.parseInt(at[0]);
         atm=Integer.parseInt(at[1]);
@@ -108,8 +113,8 @@ public class n2 extends Thread {
         InetAddress loc = InetAddress.getLocalHost(); 
          DatagramSocket socket = new DatagramSocket();
            
-
-        if (为初始 终点站是否有登记end不是null) {
+         //为初始 终点站是否有登记end不是null因为没有收到过udp的话ath和atm都为默认的0......后期需要改
+        if (ath==0) {
             for (int i = 0; i < nextstop.size(); i++) {
                 routine=udport+","+end+","+stopinfo.get(i);
                 for (int j = 0; j < neinfo.size(); j++) {
@@ -119,18 +124,18 @@ public class n2 extends Thread {
                  socket.send(packet);}
             }
             socket.close();  
-        } else if (路径已经有自己，需要考虑第二站传回自己的情况) {
+        } else if (routine.contains(name)) {
             socket.close();  
-        } else if (自己接不上，不以当前车站名结尾，不改直接传) {
+            //自己接不上直接传
+        } else if (arrivestop != name) {
             for (int i = 0; i < neinfo.size(); i++) {
                 DatagramPacket packet =
                 new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(i)));
                  
              socket.send(packet);}
             socket.close();  
-
-//忘记考虑时间问题了
-        } else if (自己接的上，下一站包括终点站 缝合之后routine 分隔出头两个，第一个取出为目标，后面一堆发送) {
+          //自己接的上，可以到终点
+        } else if (arrivestop==name&nextstop.contains(end)) {
             for (int i = 0; i < nextstop.size(); i++) {
                 if (nextstop.get(i)==end) {
                     routine = routine + stopinfo.get(i);
@@ -160,18 +165,6 @@ public class n2 extends Thread {
             socket.close();  
         }
 
-
-
-
-
-         //放在最后一块
-
-          for (int i = 0; i < neinfo.size(); i++) {
-            DatagramPacket packet =
-            new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(i)));
-             
-         socket.send(packet);}
-        socket.close();  
 
     }
 //....................................................................................................................
