@@ -35,9 +35,9 @@ public class n extends Thread {
         for (int i = 2; i < arg.length; i++) {
             neinfo.add(arg[i]);
         }
-        //TCPS();
-        //UDPR();//receiver
         getns(arg);
+        //TCPS();
+        //UDPR();
         //UDPS();//sender
 
     }
@@ -89,7 +89,7 @@ public class n extends Thread {
         end =browser4[0];
         s.close();
     }
-//............................................................................................................
+
     public void UDPR() throws IOException{
         DatagramSocket socketUDP = new DatagramSocket(udport);
 
@@ -167,10 +167,9 @@ public class n extends Thread {
 
 
     }
-//....................................................................................................................
     public static void main(String[] args) throws IOException {
 
-        n2 station = new n2(args);
+        n station = new n(args);
     
 
         System.out.println(station.stopinfo);
