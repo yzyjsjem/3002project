@@ -74,54 +74,30 @@ public class n extends Thread {
     }
 
     public void TCPS() throws IOException {
-        ServerSocket ss = new ServerSocket(tcport);
-        Socket s = ss.accept();
-        InputStream is = s.getInputStream();
-        OutputStream os = s.getOutputStream();
-        byte[] bys = new byte[1024];
-        is.read(bys);
-        String browser= new String(bys);
-        if (browser.contains("to=")) {
-            String[]browser2=browser.split("to=");
-            String browser3=browser2[1];
-            String[] browser4 = browser3.split(" HTTP/1.1");
-            end =browser4[0]; 
-        }
-
-        
-        int BUFFER_SIZE=1024;
-        
-        byte[] bytes = new byte[BUFFER_SIZE];
-        FileInputStream fis = null;
-        try {
-            //将web文件写入到OutputStream字节流中
-            File file = new File(routine);
-            if (file.exists()) {
-                fis = new FileInputStream(file);
-                int ch = fis.read(bytes, 0, BUFFER_SIZE);
-                while (ch != -1) {
-                    os.write(bytes, 0, ch);
-                    ch = fis.read(bytes, 0, BUFFER_SIZE);
+            ServerSocket ss = new ServerSocket(tcport);
+            while (1+1==2) {
+                Socket s = ss.accept();
+                
+                InputStream is = s.getInputStream();
+                OutputStream os = s.getOutputStream();
+                byte[] bys = new byte[1024];
+                is.read(bys);
+                String browser= new String(bys);
+                if (browser.contains("to=")) {
+                    String[]browser2=browser.split("to=");
+                    String browser3=browser2[1];
+                    String[] browser4 = browser3.split(" HTTP/1.1");
+                    end =browser4[0]; 
                 }
-            } else {
-                // file not found
-                String errorMessage = "HTTP/1.1 404 File Not Found\r\n" + "Content-Type: text/html\r\n"
-                        + "Content-Length: 23\r\n" + "\r\n" + "<h1>File Not Found</h1>";
-                os.write(errorMessage.getBytes());
+                byte[] bytes = new byte[1024];
+         
+                    String response = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
+                    + routine.length() + "\n\n" + routine;
+                        os.write(response.getBytes());
+    
+                s.close();
             }
-        } catch (Exception e) {
-            // thrown if cannot instantiate a File object
-            System.out.println(e.toString());
-        } finally {
-            if (fis != null)
-                fis.close();
-        }
-
-
-
-
-
-        s.close();
+        ss.close();
     }
 
     public void UDPR() throws IOException{
