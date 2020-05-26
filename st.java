@@ -2,7 +2,7 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
-public class n extends Thread {
+public class st implements Runnable{
     ArrayList<String> neinfo;// not necessary right now
     ArrayList<String> nextstop;// all next stop
     ArrayList<String> stopinfo;//specific timetable of each next stop
@@ -18,7 +18,7 @@ public class n extends Thread {
     int tcport;
     int udport;
    // divide input information and store in order.
-    public n(String[] arg) throws IOException {
+    public st(String[] arg) throws IOException {
         name = arg[0];
         tcport = Integer.parseInt(arg[1]);
         udport = Integer.parseInt(arg[2]);
@@ -95,7 +95,7 @@ public class n extends Thread {
         FileInputStream fis = null;
         try {
             //将web文件写入到OutputStream字节流中
-            File file = new File(routine);
+            File file = new File(end);
             if (file.exists()) {
                 fis = new FileInputStream(file);
                 int ch = fis.read(bytes, 0, BUFFER_SIZE);
@@ -203,7 +203,7 @@ public class n extends Thread {
     }
     public static void main(String[] args) throws IOException {
 
-        n station = new n(args);
+        st station = new st(args);
     
 
         System.out.println(station.end);
