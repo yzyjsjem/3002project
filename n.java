@@ -25,7 +25,7 @@ public class n extends Thread {
         neinfo = new ArrayList<String>();
         nextstop = new ArrayList<String>();
         stopinfo = new ArrayList<String>();
-        routine="";
+        routine="12345";
         finalway="";
         end="";
         aim=0;
@@ -75,7 +75,8 @@ public class n extends Thread {
 
     public void TCPS() throws IOException {
             ServerSocket ss = new ServerSocket(tcport);
-            while (1+1==2) {
+            boolean go=true;
+            while (go) {
                 Socket s = ss.accept();
                 
                 InputStream is = s.getInputStream();
