@@ -25,7 +25,7 @@ public class n extends Thread {
         neinfo = new ArrayList<String>();
         nextstop = new ArrayList<String>();
         stopinfo = new ArrayList<String>();
-        routine="12345";
+        routine="";
         finalway="";
         end="";
         aim=0;
@@ -74,6 +74,9 @@ public class n extends Thread {
     }
 
     public void TCPS() throws IOException {
+            Calendar now = Calendar.getInstance();
+            ath=now.get(Calendar.HOUR_OF_DAY);
+            atm=now.get(Calendar.MINUTE)
             ServerSocket ss = new ServerSocket(tcport);
             boolean go=true;
             while (go) {
