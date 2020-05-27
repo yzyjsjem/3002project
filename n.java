@@ -74,14 +74,14 @@ public class n extends Thread {
     }
 
     public void TCPS() throws IOException {
-            Calendar now = Calendar.getInstance();
-            ath=now.get(Calendar.HOUR_OF_DAY);
-            atm=now.get(Calendar.MINUTE)
+            
             ServerSocket ss = new ServerSocket(tcport);
             boolean go=true;
             while (go) {
                 Socket s = ss.accept();
-                
+                Calendar now = Calendar.getInstance();
+                ath=now.get(Calendar.HOUR_OF_DAY);
+                atm=now.get(Calendar.MINUTE);
                 InputStream is = s.getInputStream();
                 OutputStream os = s.getOutputStream();
                 byte[] bys = new byte[1024];
@@ -106,78 +106,85 @@ public class n extends Thread {
 
     public void UDPR() throws IOException{
         DatagramSocket socketUDP = new DatagramSocket(udport);
+        boolean Urgo=true;
+        while (Urgo) {
+            DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
+    
+            socketUDP.receive(packet);
+    
+            byte[] arr = packet.getData();
+            routine=new String(arr);//get data set as routine
+            String[] arrive=routine.split(",");
+            arrivetime =arrive[arrive.length-2];//get the arrivetime
+            arrivestop = arrive[arrive.length-1];
+            end = arrive[1];//get the end information
+            String[] at=arrivetime.split(":");
+            ath=Integer.parseInt(at[0]);
+            atm=Integer.parseInt(at[1]);
+            
+        }
 
-        DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
-
-        socketUDP.receive(packet);
-
-        byte[] arr = packet.getData();
-        routine=new String(arr);//get data set as routine
-        String[] arrive=routine.split(",");
-        arrivetime =arrive[arrive.length-2];//get the arrivetime
-        arrivestop = arrive[arrive.length-1];
-        end = arrive[1];//get the end information
-        String[] at=arrivetime.split(":");
-        ath=Integer.parseInt(at[0]);
-        atm=Integer.parseInt(at[1]);
         socketUDP.close();
     }
 
     public void UDPS() throws IOException{
         InetAddress loc = InetAddress.getLocalHost(); 
          DatagramSocket socket = new DatagramSocket();
-           
-         //为初始 终点站是否有登记end不是null因为没有收到过udp的话ath和atm都为默认的0......后期需要改
-        if (ath==0) {
-            for (int i = 0; i < nextstop.size(); i++) {
-                routine=udport+","+end+","+stopinfo.get(i);
-                for (int j = 0; j < neinfo.size(); j++) {
-                    DatagramPacket packet =
-                    new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(j)));
-                     
-                 socket.send(packet);}
-            }
-            socket.close();  
-        } else if (routine.contains(name)) {
-            socket.close();  
-            //自己接不上直接传
-        } else if (arrivestop != name) {
-            for (int i = 0; i < neinfo.size(); i++) {
-                DatagramPacket packet =
-                new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(i)));
+           boolean usgp=true;
+           while (usgp) {
+               
+               //为初始 终点站是否有登记end不是null因为没有收到过udp的话ath和atm都为默认的0......后期需要改
+              if (ath==0) {
+                  for (int i = 0; i < nextstop.size(); i++) {
+                      routine=udport+","+end+","+stopinfo.get(i);
+                      for (int j = 0; j < neinfo.size(); j++) {
+                          DatagramPacket packet =
+                          new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(j)));
+                           
+                       socket.send(packet);}
+                  }
+                   
+              } else if (routine.contains(name)) {
+                 continue;
+                  //自己接不上直接传
+              } else if (arrivestop != name) {
+                  for (int i = 0; i < neinfo.size(); i++) {
+                      DatagramPacket packet =
+                      new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(i)));
+                       
+                   socket.send(packet);}
                  
-             socket.send(packet);}
-            socket.close();  
-          //自己接的上，可以到终点
-        } else if (arrivestop==name&nextstop.contains(end)) {
-            for (int i = 0; i < nextstop.size(); i++) {
-                if (nextstop.get(i)==end) {
-                    routine = routine + stopinfo.get(i);
-                }
-            }
-            String[] split=routine.split(","); 
-            aim= Integer.parseInt(split[0]);
-            for (int j = 2; j < split.length; j++) {
-                finalway = finalway + split[j];
-            } 
-            DatagramPacket packet =
-            new DatagramPacket(finalway.getBytes(), finalway.getBytes().length, loc, aim);
+                //自己接的上，可以到终点
+              } else if (arrivestop==name&nextstop.contains(end)) {
+                  for (int i = 0; i < nextstop.size(); i++) {
+                      if (nextstop.get(i)==end) {
+                          routine = routine + stopinfo.get(i);
+                      }
+                  }
+                  String[] split=routine.split(","); 
+                  aim= Integer.parseInt(split[0]);
+                  for (int j = 2; j < split.length; j++) {
+                      finalway = finalway + split[j];
+                  } 
+                  DatagramPacket packet =
+                  new DatagramPacket(finalway.getBytes(), finalway.getBytes().length, loc, aim);
+                   
+              socket.send(packet);
              
-        socket.send(packet);
+                  //routine 开始分割发送后半部分
+              } else //接的上，接上自己的然后发送 可能需要两个for loop  一个i一个j时间没有考虑
+              {
+                  for (int i = 0; i < nextstop.size(); i++) {
+                      routine=routine+stopinfo.get(i);
+                      for (int j = 0; j < neinfo.size(); j++) {
+                          DatagramPacket packet =
+                          new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(j)));
+                           
+                       socket.send(packet);}
+                  }
+              }
+           }
         socket.close();  
-            //routine 开始分割发送后半部分
-        } else //接的上，接上自己的然后发送 可能需要两个for loop  一个i一个j时间没有考虑
-        {
-            for (int i = 0; i < nextstop.size(); i++) {
-                routine=routine+stopinfo.get(i);
-                for (int j = 0; j < neinfo.size(); j++) {
-                    DatagramPacket packet =
-                    new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(j)));
-                     
-                 socket.send(packet);}
-            }
-            socket.close();  
-        }
 
 
     }
