@@ -17,7 +17,19 @@ public class n extends Thread {
     int aim;// udp port of the first server.
     int tcport;
     int udport;
+    boolean runtcp;
    // divide input information and store in order.
+
+   public void run(String[] arg) throws IOException{
+       if (!runtcp) {
+           TCPS();
+           runtcp=true;
+       }
+       UDPR();
+       getns(arg);
+       UDPS();
+   }
+
     public n(String[] arg) throws IOException {
         name = arg[0];
         tcport = Integer.parseInt(arg[1]);
@@ -34,8 +46,8 @@ public class n extends Thread {
         for (int i = 2; i < arg.length; i++) {
             neinfo.add(arg[i]);
         }
-        getns(arg);
-        TCPS();
+        //getns(arg);
+        //TCPS();
         //UDPR();
         //UDPS();//sender
 
@@ -96,7 +108,7 @@ public class n extends Thread {
                 byte[] bytes = new byte[1024];
          
                     String response = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
-                    + routine.length() + "\n\n" + routine;
+                    + finalway.length() + "\n\n" + finalway;
                         os.write(response.getBytes());
     
                 s.close();
@@ -115,12 +127,19 @@ public class n extends Thread {
             byte[] arr = packet.getData();
             routine=new String(arr);//get data set as routine
             String[] arrive=routine.split(",");
-            arrivetime =arrive[arrive.length-2];//get the arrivetime
-            arrivestop = arrive[arrive.length-1];
-            end = arrive[1];//get the end information
-            String[] at=arrivetime.split(":");
-            ath=Integer.parseInt(at[0]);
-            atm=Integer.parseInt(at[1]);
+            //if this is the finalway that start at a time
+            if (arrive[0].contains(":")) {
+                finalway=routine+finalway;
+            } else {
+                
+                arrivetime =arrive[arrive.length-2];//get the arrivetime
+                arrivestop = arrive[arrive.length-1];
+                end = arrive[1];//get the end information
+                String[] at=arrivetime.split(":");
+                ath=Integer.parseInt(at[0]);
+                atm=Integer.parseInt(at[1]);
+            }
+
             
         }
 
@@ -191,9 +210,14 @@ public class n extends Thread {
     public static void main(String[] args) throws IOException {
 
         n station = new n(args);
-    
+        Thread tcp= new Thread(station);
+        Thread udpr=new Thread(station);
+        Thread udps=new Thread(station);
+        tcp.start();
+        udpr.start();
+        udps.start();   
 
-        System.out.println(station.end);
+    
     }
 
 }
