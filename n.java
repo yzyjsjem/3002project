@@ -87,13 +87,13 @@ public class n extends Thread {
     public void TCPS(String[] arg) throws IOException {
             
             ServerSocket ss = new ServerSocket(tcport);
-            Socket s = ss.accept();
-            InputStream is = s.getInputStream();
-            OutputStream os = s.getOutputStream();
+            
             byte[] bys = new byte[1024];
             boolean go=true;
             while (go) {
-                
+                Socket s = ss.accept();
+            InputStream is = s.getInputStream();
+            OutputStream os = s.getOutputStream();
                 Calendar now = Calendar.getInstance();
                 ath=now.get(Calendar.HOUR_OF_DAY);
                 atm=now.get(Calendar.MINUTE);
@@ -112,10 +112,8 @@ public class n extends Thread {
                     + finalway.length() + "\n\n" + finalway;
                         os.write(response.getBytes());
     
-                s.close();
-            }
-        ss.close();
-        getns(arg);
+                        s.close();
+                        getns(arg);
 //1.The first station, if get the request from browser which contains a terminal. And the start port and terminal name to the routine and send to its neighour.
         InetAddress loc = InetAddress.getLocalHost(); 
         DatagramSocket socket = new DatagramSocket();
@@ -128,6 +126,9 @@ public class n extends Thread {
              socket.send(packet);}
         }
         socket.close();  
+                    }
+        ss.close();
+     
 
     }
 
