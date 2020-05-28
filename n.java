@@ -19,7 +19,8 @@ public class n extends Thread {
     int udport;
     boolean runtcp;
     boolean browserequest;//browser request to find the routine 
-   // divide input information and store in order.
+    boolean findway;
+   
 
    public void run(String[] arg) throws IOException{
        if (!runtcp) {
@@ -28,7 +29,7 @@ public class n extends Thread {
        }
        UDP(arg);
    }
-
+// divide input information and store in order.
     public n(String[] arg) throws IOException {
         name = arg[0];
         tcport = Integer.parseInt(arg[1]);
@@ -106,14 +107,14 @@ public class n extends Thread {
                     String[] browser4 = browser3.split(" HTTP/1.1");
                     end =browser4[0]; 
                 }
-                byte[] bytes = new byte[1024];
-         
-                    String response = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
-                    + finalway.length() + "\n\n" + finalway;
-                        os.write(response.getBytes());
-    
-                        s.close();
-                        getns(arg);
+                else{
+                    String error ="HTTP/1.1 404 Not Found \n" + "Content-Type: text/html\n"
+                    + "Content-Length: 29" + "\n\n" + "<h1>Request Not Correct!</h1>";
+                        os.write(error.getBytes());
+
+                    continue;
+                }
+                getns(arg);
 //1.The first station, if get the request from browser which contains a terminal. And the start port and terminal name to the routine and send to its neighour.
         InetAddress loc = InetAddress.getLocalHost(); 
         DatagramSocket socket = new DatagramSocket();
@@ -126,6 +127,16 @@ public class n extends Thread {
              socket.send(packet);}
         }
         socket.close();  
+                byte[] bytes = new byte[1024];
+         while (!findway) {
+             
+         }
+                    String response = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
+                    + finalway.length() + "\n\n" + finalway;
+                        os.write(response.getBytes());
+    
+                        s.close();
+                        
                     }
         ss.close();
      
@@ -147,6 +158,9 @@ public class n extends Thread {
             //if this is the finalway that start at a time
             if (arrive[0].contains(":")) {
                 finalway=routine+finalway;
+                findway=true;
+
+                continue;
             } else {
                 
                 arrivetime =arrive[arrive.length-2];//get the arrivetime
