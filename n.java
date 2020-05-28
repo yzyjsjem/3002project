@@ -217,10 +217,10 @@ public class n implements Runnable {
 
                 // 4.IF the stop is the last stop of the routine and can go to the terminal.
                 // rewrite the routine and send back to the start.
-            } else if (arrivestop == name && getend) {
+            } else if (arrivestop.equals(name) && getend) {
                 getend=false;
                 for (int i = 0; i < nextstop.size(); i++) {
-                    if (nextstop.get(i) == end) {
+                    if (nextstop.get(i).equals(end)) {
                         routine = routine + stopinfo.get(i);
                     }
                 }
