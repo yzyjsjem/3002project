@@ -24,9 +24,9 @@ public class n extends Thread {
    public void run(String[] arg) throws IOException{
        if (!runtcp) {
            runtcp=true;
-           TCPS();
+           TCPS(arg);
        }
-       UDP();
+       UDP(arg);
    }
 
     public n(String[] arg) throws IOException {
@@ -84,15 +84,16 @@ public class n extends Thread {
         in.close();
     }
 
-    public void TCPS() throws IOException {
+    public void TCPS(String[] arg) throws IOException {
             
             ServerSocket ss = new ServerSocket(tcport);
+            Socket s = ss.accept();
             boolean go=true;
             InputStream is = s.getInputStream();
                 OutputStream os = s.getOutputStream();
                 byte[] bys = new byte[1024];
             while (go) {
-                Socket s = ss.accept();
+                
                 Calendar now = Calendar.getInstance();
                 ath=now.get(Calendar.HOUR_OF_DAY);
                 atm=now.get(Calendar.MINUTE);
@@ -114,18 +115,32 @@ public class n extends Thread {
                 s.close();
             }
         ss.close();
+        getns(arg);
+//1.The first station, if get the request from browser which contains a terminal. And the start port and terminal name to the routine and send to its neighour.
+        InetAddress loc = InetAddress.getLocalHost(); 
+        DatagramSocket socket = new DatagramSocket();
+        for (int i = 0; i < nextstop.size(); i++) {
+            routine=udport+","+end+","+stopinfo.get(i);
+            for (int j = 0; j < neinfo.size(); j++) {
+                DatagramPacket packet =
+                new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(j)));
+                 
+             socket.send(packet);}
+        }
+        socket.close();  
+
     }
 
-    public void UDP() throws IOException{
+    public void UDP(String[] arg) throws IOException{
         InetAddress loc = InetAddress.getLocalHost(); 
-        DatagramSocket socketUDP = new DatagramSocket(udport);
+        DatagramSocket socket = new DatagramSocket(udport);
         boolean Urgo=true;
         while (Urgo) {
-            DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
+            DatagramPacket packetr = new DatagramPacket(new byte[1024], 1024);
     
-            socketUDP.receive(packet);
+            socket.receive(packetr);
     
-            byte[] arr = packet.getData();
+            byte[] arr = packetr.getData();
             routine=new String(arr);//get data set as routine
             String[] arrive=routine.split(",");
             //if this is the finalway that start at a time
@@ -142,21 +157,10 @@ public class n extends Thread {
             }
             //before send udprequest, remake the timetable
             getns(arg);
-            if (browserequest) {
-                
-                //1.The first station, if get the request from browser which contains a terminal. And the start port and terminal name to the routine and send to its neighour.
-               if (browserequest) {
-                   for (int i = 0; i < nextstop.size(); i++) {
-                       routine=udport+","+end+","+stopinfo.get(i);
-                       for (int j = 0; j < neinfo.size(); j++) {
-                           DatagramPacket packet =
-                           new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(j)));
-                            
-                        socket.send(packet);}
-                    browserequest=false;
-                   }
+            
+              
                     //2.if the stop has already in the routine, just abandon.
-               } else if (routine.contains(name)) {
+                if (routine.contains(name)) {
                   continue;
                    //3. If this station is not last stop in the routine,send the message to neighbour.
                } else if (arrivestop != name) {
@@ -195,14 +199,14 @@ public class n extends Thread {
                         socket.send(packet);}
                    }
                }
-            }
+            
             
         }
         
 
 
 
-        socketUDP.close();
+        socket.close();
     }
 
     public static void main(String[] args) throws IOException {
