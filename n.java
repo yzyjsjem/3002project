@@ -18,6 +18,7 @@ public class n extends Thread {
     int tcport;
     int udport;
     boolean runtcp;
+    boolean browserequest;
    // divide input information and store in order.
 
    public void run(String[] arg) throws IOException{
@@ -100,6 +101,7 @@ public class n extends Thread {
                 is.read(bys);
                 String browser= new String(bys);
                 if (browser.contains("to=")) {
+                    browserequest=true;
                     String[]browser2=browser.split("to=");
                     String browser3=browser2[1];
                     String[] browser4 = browser3.split(" HTTP/1.1");
@@ -117,6 +119,7 @@ public class n extends Thread {
     }
 
     public void UDPR() throws IOException{
+        InetAddress loc = InetAddress.getLocalHost(); 
         DatagramSocket socketUDP = new DatagramSocket(udport);
         boolean Urgo=true;
         while (Urgo) {
@@ -142,71 +145,67 @@ public class n extends Thread {
 
             
         }
+        boolean usgp=true;
+        while (usgp) {
+            
+            //1.The first station, if get the request from browser which contains a terminal. And the start port and terminal name to the routine and send to its neighour.
+           if (browserequest) {
+               for (int i = 0; i < nextstop.size(); i++) {
+                   routine=udport+","+end+","+stopinfo.get(i);
+                   for (int j = 0; j < neinfo.size(); j++) {
+                       DatagramPacket packet =
+                       new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(j)));
+                        
+                    socket.send(packet);}
+                browserequest=false;
+               }
+                //2.if the stop has already in the routine, just abandon.
+           } else if (routine.contains(name)) {
+              continue;
+               //3. If this station is not last stop in the routine,send the message to neighbour.
+           } else if (arrivestop != name) {
+               for (int i = 0; i < neinfo.size(); i++) {
+                   DatagramPacket packet =
+                   new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(i)));
+                    
+                socket.send(packet);}
+              
+             //4.IF the stop is the last stop of the routine and can go to the terminal. rewrite the routine and send back to the start.
+           } else if (arrivestop==name&nextstop.contains(end)) {
+               for (int i = 0; i < nextstop.size(); i++) {
+                   if (nextstop.get(i)==end) {
+                       routine = routine + stopinfo.get(i);
+                   }
+               }
+               String[] split=routine.split(","); 
+               aim= Integer.parseInt(split[0]);
+               for (int j = 2; j < split.length; j++) {
+                   finalway = finalway + split[j];
+               } 
+               DatagramPacket packet =
+               new DatagramPacket(finalway.getBytes(), finalway.getBytes().length, loc, aim);
+                
+           socket.send(packet);
+          
+             
+           } else //5. the station is the last stop of the routine but can't go to the terminal, send all possible routine to its neighour.
+           {
+               for (int i = 0; i < nextstop.size(); i++) {
+                   routine=routine+stopinfo.get(i);
+                   for (int j = 0; j < neinfo.size(); j++) {
+                       DatagramPacket packet =
+                       new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(j)));
+                        
+                    socket.send(packet);}
+               }
+           }
+        }
+
+
 
         socketUDP.close();
     }
 
-    public void UDPS() throws IOException{
-        InetAddress loc = InetAddress.getLocalHost(); 
-         DatagramSocket socket = new DatagramSocket();
-           boolean usgp=true;
-           while (usgp) {
-               
-               //为初始 终点站是否有登记end不是null因为没有收到过udp的话ath和atm都为默认的0......后期需要改
-              if (ath==0) {
-                  for (int i = 0; i < nextstop.size(); i++) {
-                      routine=udport+","+end+","+stopinfo.get(i);
-                      for (int j = 0; j < neinfo.size(); j++) {
-                          DatagramPacket packet =
-                          new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(j)));
-                           
-                       socket.send(packet);}
-                  }
-                   
-              } else if (routine.contains(name)) {
-                 continue;
-                  //自己接不上直接传
-              } else if (arrivestop != name) {
-                  for (int i = 0; i < neinfo.size(); i++) {
-                      DatagramPacket packet =
-                      new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(i)));
-                       
-                   socket.send(packet);}
-                 
-                //自己接的上，可以到终点
-              } else if (arrivestop==name&nextstop.contains(end)) {
-                  for (int i = 0; i < nextstop.size(); i++) {
-                      if (nextstop.get(i)==end) {
-                          routine = routine + stopinfo.get(i);
-                      }
-                  }
-                  String[] split=routine.split(","); 
-                  aim= Integer.parseInt(split[0]);
-                  for (int j = 2; j < split.length; j++) {
-                      finalway = finalway + split[j];
-                  } 
-                  DatagramPacket packet =
-                  new DatagramPacket(finalway.getBytes(), finalway.getBytes().length, loc, aim);
-                   
-              socket.send(packet);
-             
-                  //routine 开始分割发送后半部分
-              } else //接的上，接上自己的然后发送 可能需要两个for loop  一个i一个j时间没有考虑
-              {
-                  for (int i = 0; i < nextstop.size(); i++) {
-                      routine=routine+stopinfo.get(i);
-                      for (int j = 0; j < neinfo.size(); j++) {
-                          DatagramPacket packet =
-                          new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc, Integer.parseInt(neinfo.get(j)));
-                           
-                       socket.send(packet);}
-                  }
-              }
-           }
-        socket.close();  
-
-
-    }
     public static void main(String[] args) throws IOException {
 
         n station = new n(args);
