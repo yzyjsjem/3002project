@@ -6,12 +6,17 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - n",
+            "request": "launch",
+            "mainClass": "n",
+            "projectName": "3002project_3f99967a",
+            "args": "BusportA 5001 2001 2000 2002"
+        },
+        {
+            "type": "java",
             "name": "Debug (Launch) - Current File",
             "request": "launch",
-            "mainClass": "${file}",
-            // "args": "TerminalA 5000 2000 2001"
-            // "args": "JunctionB 5001 2001 2000"
-            "args": "B 5001 2001 2000 2002"
+            "mainClass": "${file}"
         }
     ]
 }
