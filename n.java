@@ -23,6 +23,7 @@ public class n implements Runnable {
     boolean initialstop;
     boolean getend;
     boolean havepassed;
+    boolean connect;
 
     public void run() {
         try {
@@ -199,6 +200,9 @@ public class n implements Runnable {
                     havepassed=true;
                 }
             }
+            if (arrivestop.contains(name)) {
+                connect=true;
+            }
 
             // 2.if the stop has already in the routine, just abandon.
             if (havepassed||initialstop) {
@@ -206,7 +210,7 @@ public class n implements Runnable {
                 continue;
                 // 3. If this station is not last stop in the routine,send the message to
                 // neighbour.
-            } else if (!arrivestop.equals(name)) {
+            } else if (connect) {
                 for (int i = 0; i < neinfo.size(); i++) {
                     DatagramPacket packet = new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc,
                             Integer.parseInt(neinfo.get(i)));
@@ -217,7 +221,7 @@ public class n implements Runnable {
 
                 // 4.IF the stop is the last stop of the routine and can go to the terminal.
                 // rewrite the routine and send back to the start.
-            } else if (arrivestop.equals(name) && getend) {
+            } else if (connect && getend) {
                 getend=false;
                 for (int i = 0; i < nextstop.size(); i++) {
                     if (nextstop.get(i).equals(end)) {
@@ -245,7 +249,7 @@ public class n implements Runnable {
 
                         socket.send(packet);
                     }
-                    System.out.println("keep going "+routine);
+                    System.out.println("keep going "+"connect is"+connect+"getend is"+getend+"//////"+routine);
                 }
             }
 
