@@ -20,6 +20,9 @@ public class n implements Runnable {
     boolean runtcp;
     boolean browserequest;// browser request to find the routine
     boolean findway;
+    boolean initialstop;
+    boolean getend;
+    boolean havepassed;
 
     public void run() {
         try {
@@ -133,12 +136,15 @@ public class n implements Runnable {
                             Integer.parseInt(neinfo.get(j)));
 
                     socket.send(packet);
+
                 }
+                System.out.println(routine);
             }
+            initialstop=true;
             socket.close();
             byte[] bytes = new byte[1024];
             while (!findway) {
-               System.out.println("im stuccccccccccccccccccccccccck");
+               //System.out.println("im waiting");
             }
             String response = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
                     + finalway.length() + "\n\n" + finalway;
@@ -165,7 +171,7 @@ public class n implements Runnable {
             String[] arrive = routine.split(",");
             // if this is the finalway that start at a time
             if (arrive[0].contains(":")) {
-                finalway = routine + finalway;
+                finalway = finalway+routine;
                 findway = true;
                 System.out.println("find the way");
 
@@ -181,25 +187,38 @@ public class n implements Runnable {
             }
             // before send udprequest, remake the timetable
             getns();
+            for (int i = 0; i < nextstop.size(); i++) {
+                if (nextstop.get(i).equals(end)) {
+                    getend=true;
+                } 
+                
+            }
+            String[]check=routine.split(",");
+            for (int i = 0; i < check.length-1; i++) {
+                if (check[i].equals(name)) {
+                    havepassed=true;
+                }
+            }
 
             // 2.if the stop has already in the routine, just abandon.
-            if (routine.contains(name)) {
-                System.out.println("already pass");
+            if (havepassed||initialstop) {
+                System.out.println("already pass "+routine);
                 continue;
                 // 3. If this station is not last stop in the routine,send the message to
                 // neighbour.
-            } else if (arrivestop != name) {
+            } else if (!arrivestop.equals(name)) {
                 for (int i = 0; i < neinfo.size(); i++) {
                     DatagramPacket packet = new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc,
                             Integer.parseInt(neinfo.get(i)));
 
                     socket.send(packet);
                 }
-                System.out.println("pass");
+                System.out.println("pass "+"arrivestopis//"+arrivestop+"//nameis//"+name+"//"+ routine);
 
                 // 4.IF the stop is the last stop of the routine and can go to the terminal.
                 // rewrite the routine and send back to the start.
-            } else if (arrivestop == name & nextstop.contains(end)) {
+            } else if (arrivestop == name && getend) {
+                getend=false;
                 for (int i = 0; i < nextstop.size(); i++) {
                     if (nextstop.get(i) == end) {
                         routine = routine + stopinfo.get(i);
