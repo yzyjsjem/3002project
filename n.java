@@ -23,11 +23,16 @@ public class n implements Runnable{
    
 
    public void run(){
-       if (!runtcp) {
-           runtcp=true;
-           TCPS();
+       try {
+        if (!runtcp) {
+            runtcp=true;
+            TCPS();
+        }
+        UDP();
+       } catch (Exception e) {
+           //TODO: handle exception
        }
-       UDP();
+      
    }
 // divide input information and store in order.
     public n(String[] arg) {
