@@ -88,10 +88,10 @@ public class n extends Thread {
             
             ServerSocket ss = new ServerSocket(tcport);
             Socket s = ss.accept();
-            boolean go=true;
             InputStream is = s.getInputStream();
-                OutputStream os = s.getOutputStream();
-                byte[] bys = new byte[1024];
+            OutputStream os = s.getOutputStream();
+            byte[] bys = new byte[1024];
+            boolean go=true;
             while (go) {
                 
                 Calendar now = Calendar.getInstance();
@@ -213,11 +213,9 @@ public class n extends Thread {
 
         n station = new n(args);
         Thread tcp= new Thread(station);
-        Thread udpr=new Thread(station);
-        Thread udps=new Thread(station);
+        Thread udp=new Thread(station);
         tcp.start();
-        udpr.start();
-        udps.start();   
+        udp.start();
 
     
     }
