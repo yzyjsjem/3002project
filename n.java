@@ -22,8 +22,8 @@ public class n extends Thread {
 
    public void run(String[] arg) throws IOException{
        if (!runtcp) {
-           TCPS();
            runtcp=true;
+           TCPS();
        }
        UDPR();
        getns(arg);
@@ -54,7 +54,7 @@ public class n extends Thread {
     }
      // give next bus stop from timetable
      public void getns(String[] arg) throws IOException {
-        Scanner in = new Scanner(new FileReader("tt-" + arg[0]));
+        Scanner in = new Scanner(new FileReader("tt-" +name));
         in.next();
         String stop;
         while (in.hasNext()) {
@@ -66,7 +66,7 @@ public class n extends Thread {
             int stm=Integer.parseInt(st[1]);
 
             stop = res[res.length - 1];//next stop
-            if (sth>=ath&stm>=atm) {
+            if (sth>ath||(sth==ath&&stm>=atm)) {
                 Boolean repeat = false;
                 for (int i = 0; i < nextstop.size(); i++) {
                     if (nextstop.get(i).equals(stop)) {
@@ -89,14 +89,14 @@ public class n extends Thread {
             
             ServerSocket ss = new ServerSocket(tcport);
             boolean go=true;
+            InputStream is = s.getInputStream();
+                OutputStream os = s.getOutputStream();
+                byte[] bys = new byte[1024];
             while (go) {
                 Socket s = ss.accept();
                 Calendar now = Calendar.getInstance();
                 ath=now.get(Calendar.HOUR_OF_DAY);
                 atm=now.get(Calendar.MINUTE);
-                InputStream is = s.getInputStream();
-                OutputStream os = s.getOutputStream();
-                byte[] bys = new byte[1024];
                 is.read(bys);
                 String browser= new String(bys);
                 if (browser.contains("to=")) {
