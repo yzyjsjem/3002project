@@ -2,7 +2,7 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
-public class n extends Thread {
+public class n implements Runnable{
     ArrayList<String> neinfo;// not necessary right now
     ArrayList<String> nextstop;// all next stop
     ArrayList<String> stopinfo;//specific timetable of each next stop
@@ -22,15 +22,15 @@ public class n extends Thread {
     boolean findway;
    
 
-   public void run(String[] arg) throws IOException{
+   public void run(){
        if (!runtcp) {
            runtcp=true;
-           TCPS(arg);
+           TCPS();
        }
-       UDP(arg);
+       UDP();
    }
 // divide input information and store in order.
-    public n(String[] arg) throws IOException {
+    public n(String[] arg) {
         name = arg[0];
         tcport = Integer.parseInt(arg[1]);
         udport = Integer.parseInt(arg[2]);
@@ -53,7 +53,7 @@ public class n extends Thread {
 
     }
      // give next bus stop from timetable
-     public void getns(String[] arg) throws IOException {
+     public void getns(){
         Scanner in = new Scanner(new FileReader("tt-" +name));
         in.next();
         String stop;
@@ -85,7 +85,7 @@ public class n extends Thread {
         in.close();
     }
 
-    public void TCPS(String[] arg) throws IOException {
+    public void TCPS() {
             
             ServerSocket ss = new ServerSocket(tcport);
             
@@ -114,7 +114,7 @@ public class n extends Thread {
 
                     continue;
                 }
-                getns(arg);
+                getns();
 //1.The first station, if get the request from browser which contains a terminal. And the start port and terminal name to the routine and send to its neighour.
         InetAddress loc = InetAddress.getLocalHost(); 
         DatagramSocket socket = new DatagramSocket();
@@ -143,7 +143,7 @@ public class n extends Thread {
 
     }
 
-    public void UDP(String[] arg) throws IOException{
+    public void UDP(){
         InetAddress loc = InetAddress.getLocalHost(); 
         DatagramSocket socket = new DatagramSocket(udport);
         boolean Urgo=true;
@@ -171,7 +171,7 @@ public class n extends Thread {
                 atm=Integer.parseInt(at[1]);
             }
             //before send udprequest, remake the timetable
-            getns(arg);
+            getns();
             
               
                     //2.if the stop has already in the routine, just abandon.
@@ -224,7 +224,7 @@ public class n extends Thread {
         socket.close();
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args)  {
 
         n station = new n(args);
         Thread tcp= new Thread(station);
