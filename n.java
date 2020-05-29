@@ -108,6 +108,7 @@ public class n implements Runnable {
             String browser = new String(bys);
             if (browser.contains("to=")) {
                 browserequest = true;
+                System.out.println("get the order");
                 String[] browser2 = browser.split("to=");
                 String browser3 = browser2[1];
                 String[] browser4 = browser3.split(" HTTP/1.1");
@@ -137,7 +138,7 @@ public class n implements Runnable {
             socket.close();
             byte[] bytes = new byte[1024];
             while (!findway) {
-
+               System.out.println("im stuccccccccccccccccccccccccck");
             }
             String response = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
                     + finalway.length() + "\n\n" + finalway;
@@ -166,6 +167,7 @@ public class n implements Runnable {
             if (arrive[0].contains(":")) {
                 finalway = routine + finalway;
                 findway = true;
+                System.out.println("find the way");
 
                 continue;
             } else {
@@ -182,6 +184,7 @@ public class n implements Runnable {
 
             // 2.if the stop has already in the routine, just abandon.
             if (routine.contains(name)) {
+                System.out.println("already pass");
                 continue;
                 // 3. If this station is not last stop in the routine,send the message to
                 // neighbour.
@@ -192,6 +195,7 @@ public class n implements Runnable {
 
                     socket.send(packet);
                 }
+                System.out.println("pass");
 
                 // 4.IF the stop is the last stop of the routine and can go to the terminal.
                 // rewrite the routine and send back to the start.
@@ -209,6 +213,7 @@ public class n implements Runnable {
                 DatagramPacket packet = new DatagramPacket(finalway.getBytes(), finalway.getBytes().length, loc, aim);
 
                 socket.send(packet);
+                System.out.println("ready to finish "+finalway);
 
             } else // 5. the station is the last stop of the routine but can't go to the terminal,
                    // send all possible routine to its neighour.
@@ -221,6 +226,7 @@ public class n implements Runnable {
 
                         socket.send(packet);
                     }
+                    System.out.println("keep going "+routine);
                 }
             }
 
