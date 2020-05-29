@@ -206,7 +206,7 @@ public class n implements Runnable {
 
             // 2.if the stop has already in the routine, just abandon.
             if (havepassed||initialstop) {
-                havepassed=flase;
+                havepassed=false;
                 System.out.println("already pass "+routine);
                 continue;
                 // 3. If this station is not last stop in the routine,send the message to
@@ -218,7 +218,7 @@ public class n implements Runnable {
 
                     socket.send(packet);
                 }
-                System.out.println("pass "+"arrivestopis//"+arrivestop+"//nameis//"+name+"//"+ routine);
+                System.out.println("pass "+"arrivestopis//"+arrivestop+"//nameis//"+name+"//"+"connectsituation "+connect+"/////"+ routine);
 
                 // 4.IF the stop is the last stop of the routine and can go to the terminal.
                 // rewrite the routine and send back to the start.
