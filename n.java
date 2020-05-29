@@ -195,7 +195,7 @@ public class n implements Runnable {
                 
             }
             String[]check=routine.split(",");
-            for (int i = 0; i < check.length-1; i++) {
+            for (int i = 2; i < check.length-1; i++) {
                 if (check[i].equals(name)) {
                     havepassed=true;
                 }
