@@ -200,17 +200,18 @@ public class n implements Runnable {
                     havepassed=true;
                 }
             }
-            if (arrivestop.contains(name)) {
+            if (arrivestop.equals(name)) {
                 connect=true;
             }
 
             // 2.if the stop has already in the routine, just abandon.
             if (havepassed||initialstop) {
+                havepassed=flase;
                 System.out.println("already pass "+routine);
                 continue;
                 // 3. If this station is not last stop in the routine,send the message to
                 // neighbour.
-            } else if (connect) {
+            } else if (!connect){
                 for (int i = 0; i < neinfo.size(); i++) {
                     DatagramPacket packet = new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc,
                             Integer.parseInt(neinfo.get(i)));
@@ -222,6 +223,7 @@ public class n implements Runnable {
                 // 4.IF the stop is the last stop of the routine and can go to the terminal.
                 // rewrite the routine and send back to the start.
             } else if (connect && getend) {
+                connect=false;
                 getend=false;
                 for (int i = 0; i < nextstop.size(); i++) {
                     if (nextstop.get(i).equals(end)) {
@@ -241,6 +243,7 @@ public class n implements Runnable {
             } else // 5. the station is the last stop of the routine but can't go to the terminal,
                    // send all possible routine to its neighour.
             {
+                connect=false;
                 for (int i = 0; i < nextstop.size(); i++) {
                     routine = routine + stopinfo.get(i);
                     for (int j = 0; j < neinfo.size(); j++) {
