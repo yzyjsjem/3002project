@@ -24,6 +24,7 @@ public class n implements Runnable {
     boolean getend;
     boolean havepassed;
     boolean connect;
+    boolean directway;//如果可以直达
 
     public void run() {
         try {
@@ -125,24 +126,40 @@ public class n implements Runnable {
                 continue;
             }
             getns();
-            // 1.The first station, if get the request from browser which contains a
-            // terminal. And the start port and terminal name to the routine and send to its
-            // neighour.
-            InetAddress loc = InetAddress.getLocalHost();
-            DatagramSocket socket = new DatagramSocket();
             for (int i = 0; i < nextstop.size(); i++) {
-                routine = udport + "," + end + "," + stopinfo.get(i);
-                for (int j = 0; j < neinfo.size(); j++) {
-                    DatagramPacket packet = new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc,
-                            Integer.parseInt(neinfo.get(j)));
+                nextstop.get(i).equals(end);
+                finalway=stopinfo.get(i);
+                directway=true;
 
-                    socket.send(packet);
-
-                }
-                System.out.println(routine);
             }
-            initialstop=true;
-            socket.close();
+
+            if (directway) {
+                String response = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
+                    + finalway.length() + "\n\n" + finalway;
+            os.write(response.getBytes());
+
+            s.close();
+            } else {
+                // 1.The first station, if get the request from browser which contains a
+                // terminal. And the start port and terminal name to the routine and send to its
+                // neighour.
+                InetAddress loc = InetAddress.getLocalHost();
+                DatagramSocket socket = new DatagramSocket();
+                for (int i = 0; i < nextstop.size(); i++) {
+                    routine = udport + "," + end + "," + stopinfo.get(i);
+                    for (int j = 0; j < neinfo.size(); j++) {
+                        DatagramPacket packet = new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc,
+                                Integer.parseInt(neinfo.get(j)));
+    
+                        socket.send(packet);
+    
+                    }
+                    System.out.println(routine);
+                }
+                initialstop=true;
+                socket.close();
+                
+            }
             byte[] bytes = new byte[1024];
             while (!findway) {
                //System.out.println("im waiting");
