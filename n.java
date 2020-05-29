@@ -127,9 +127,10 @@ public class n implements Runnable {
             }
             getns();
             for (int i = 0; i < nextstop.size(); i++) {
-                nextstop.get(i).equals(end);
-                finalway=stopinfo.get(i);
-                directway=true;
+                if (nextstop.get(i).equals(end)) {
+                    finalway=stopinfo.get(i);
+                    directway=true;
+                } 
 
             }
 
@@ -218,6 +219,7 @@ public class n implements Runnable {
                 }
             }
             if (arrivestop.equals(name)) {
+                System.err.println("已进入该分支");
                 connect=true;
             }
 
