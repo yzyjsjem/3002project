@@ -35,7 +35,7 @@ public class n implements Runnable {
             UDP();
 
         } catch (Exception e) {
-            // TODO: handle exception
+            e.printStackTrace();
         }
     }
 
@@ -90,7 +90,7 @@ public class n implements Runnable {
                     stopinfo.add(Cline);
                 }
             } else {
-                in.next();
+                continue;
             }
         }
         in.close();
