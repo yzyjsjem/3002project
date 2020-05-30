@@ -25,6 +25,7 @@ public class n implements Runnable {
     boolean havepassed;
     boolean connect;
     boolean directway;//如果可以直达
+    int count;
 
     public void run() {
         try {
@@ -53,6 +54,7 @@ public class n implements Runnable {
         aim = 0;
         ath = 0;// 如果是初始站的话就要提前设置时间
         atm = 0;
+        count=0;
         for (int i = 2; i < arg.length; i++) {
             neinfo.add(arg[i]);
         }
@@ -153,6 +155,7 @@ public class n implements Runnable {
                                 Integer.parseInt(neinfo.get(j)));
     
                         socket.send(packet);
+                        count++;
     
                     }
                     System.out.println(routine);
@@ -163,7 +166,16 @@ public class n implements Runnable {
             }
             byte[] bytes = new byte[1024];
             while (!findway) {
-               //System.out.println("im waiting");
+               System.out.println("im waiting");
+               /*
+              //if (count>10) {
+                String response = "HTTP/1.1 404 Not Found \n" + "Content-Type: text/html\n" + "Content-Length: 29" + "\n\n"
+                        + "<h1>No way!</h1>";
+        os.write(response.getBytes());
+
+        s.close();
+               //}
+               */
             }
             String response = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
                     + finalway.length() + "\n\n" + finalway;
@@ -185,8 +197,8 @@ public class n implements Runnable {
 
             socket.receive(packetr);
 
-            byte[] arr = packetr.getData();
-            routine = new String(arr);// get data set as routine
+            //byte[] arr = packetr.getData();
+            routine = new String(packetr.getData(),0,packetr.getLength());// get data set as routine
             String[] arrive = routine.split(",");
             // if this is the finalway that start at a time
             if (arrive[0].contains(":")) {
@@ -219,31 +231,28 @@ public class n implements Runnable {
                 }
             }
 
-            System.out.println(arrivestop+"length="+arrivestop.length()+name+"length="+name.length());
-            if (this.arrivestop.equals(name)) {
-                connect=true;
-            }
+            //System.out.println(arrivestop+"length="+arrivestop.length()+name+"length="+name.length());
 
+            count++;
             // 2.if the stop has already in the routine, just abandon.
             if (havepassed||initialstop) {
                 havepassed=false;
-                System.out.println("already pass "+routine);
+                //System.out.println("already pass "+routine);
                 continue;
                 // 3. If this station is not last stop in the routine,send the message to
                 // neighbour.
-            } else if (!connect){
+            } else if (!arrivestop.equals(name)){
                 for (int i = 0; i < neinfo.size(); i++) {
                     DatagramPacket packet = new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc,
                             Integer.parseInt(neinfo.get(i)));
 
                     socket.send(packet);
                 }
-                System.out.println("pass "+"arrivestopis//"+arrivestop+"//nameis//"+name+"//"+"connectsituation "+connect+"/////"+ routine);
+                //System.out.println("pass "+"arrivestopis//"+arrivestop+"//nameis//"+name+"//"+"connectsituation "+connect+"/////"+ routine);
 
                 // 4.IF the stop is the last stop of the routine and can go to the terminal.
                 // rewrite the routine and send back to the start.
-            } else if (connect && getend) {
-                connect=false;
+            } else if (arrivestop.equals(name) && getend) {
                 getend=false;
                 for (int i = 0; i < nextstop.size(); i++) {
                     if (nextstop.get(i).equals(end)) {
@@ -263,7 +272,6 @@ public class n implements Runnable {
             } else // 5. the station is the last stop of the routine but can't go to the terminal,
                    // send all possible routine to its neighour.
             {
-                connect=false;
                 for (int i = 0; i < nextstop.size(); i++) {
                     routine = routine + stopinfo.get(i);
                     for (int j = 0; j < neinfo.size(); j++) {
