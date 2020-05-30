@@ -161,7 +161,7 @@ public class n implements Runnable {
                 socket.close();
 
             }
-            byte[] bytes = new byte[1024];
+            // byte[] bytes = new byte[1024];
             while (!findway) {
                 // System.out.println("im waiting");
             }
@@ -187,7 +187,7 @@ public class n implements Runnable {
 
             // byte[] arr = packetr.getData();
             // routine = new String(arr);// get data set as routine
-            routine = new String(packetr.getData(), 0, packetr.getLength())// get data set as routine
+            routine = new String(packetr.getData(), 0, packetr.getLength());// get data set as routine
             String[] arrive = routine.split(",");
             // if this is the finalway that start at a time
             if (arrive[0].contains(":")) {
