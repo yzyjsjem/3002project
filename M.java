@@ -3,7 +3,7 @@ import java.util.concurrent.TimeUnit;
 import java.io.*;
 import java.net.*;
 
-public class N implements Runnable {
+public class M implements Runnable {
     ArrayList<String> neinfo;// not necessary right now
     ArrayList<String> nextstop;// all next stop
     ArrayList<String> stopinfo;// specific timetable of each next stop
@@ -18,17 +18,18 @@ public class N implements Runnable {
     int aim;// udp port of the first server.
     int tcport;
     int udport;
-    boolean runtcp;
+    boolean runtcp;//keep tcp running
     boolean browserequest;// browser request to find the routine
-    boolean findway;
-    boolean initialstop;
-    boolean getend;
-    boolean havepassed;
-    boolean directway;//如果可以直达
+    boolean findway;//if find the way it will return the correct answer 
+    boolean initialstop;//check if the initalstop and decide how to handle udp information
+    boolean getend;//if the current station could go to the destination
+    boolean havepassed;//if the current station already been passed in the routine
+    boolean directway;//if the inital station could directly go to the destination
+
 
     public void run() {
         try {
-            if (!runtcp) {
+            if (!runtcp) {//keep tcp runing and let the next one do udp
                 runtcp = true;
                 TCPS();
             }
@@ -40,7 +41,7 @@ public class N implements Runnable {
     }
 
     // divide input information and store in order.
-    public N(String[] arg) {
+    public M(String[] arg) {
         name = arg[0];
         tcport = Integer.parseInt(arg[1]);
         udport = Integer.parseInt(arg[2]);
@@ -50,23 +51,14 @@ public class N implements Runnable {
         routine = "";
         finalway = "";
         end = "";
-        aim = 0;
-        ath = 0;// 如果是初始站的话就要提前设置时间
-        atm = 0;
         for (int i = 2; i < arg.length; i++) {
             neinfo.add(arg[i]);
         }
-        // getns(arg);
-        // TCPS();
-        // UDPR();
-        // UDPS();//sender
 
     }
 
     // give next bus stop from timetable
     public void getns() throws Exception {
-        nextstop.clear();
-        stopinfo.clear();
         Scanner in = new Scanner(new FileReader("tt-" + name));
         in.next();
         String stop;
@@ -87,7 +79,7 @@ public class N implements Runnable {
                         break;
                     }
                 }
-                if (!repeat) {
+                if (!repeat) {//save the earlist routine and their nextstop, each stop have one earlist routine
                     nextstop.add(stop);
                     stopinfo.add(Cline);
                 }
@@ -109,26 +101,26 @@ public class N implements Runnable {
             InputStream is = s.getInputStream();
             OutputStream os = s.getOutputStream();
             Calendar now = Calendar.getInstance();
-            ath = now.get(Calendar.HOUR_OF_DAY);
+            ath = now.get(Calendar.HOUR_OF_DAY);//get the hour and minute of right time and will be used in getns to choose the earlist routine
             atm = now.get(Calendar.MINUTE);
             is.read(bys);
             String browser = new String(bys);
-            if (browser.contains("to=")) {
+            if (browser.contains("to=")) {//if get the order of destination
                 browserequest = true;
                 System.out.println("get the order");
                 String[] browser2 = browser.split("to=");
                 String browser3 = browser2[1];
                 String[] browser4 = browser3.split(" HTTP/1.1");
                 end = browser4[0];
-            } else {
+            } else {//if no order
                 String error = "HTTP/1.1 404 Not Found \n" + "Content-Type: text/html\n" + "Content-Length: 29" + "\n\n"
                         + "<h1>Request Not Correct!</h1>";
                 os.write(error.getBytes());
 
                 continue;
             }
-            getns();
-            for (int i = 0; i < nextstop.size(); i++) {
+            getns();//read timetable
+            for (int i = 0; i < nextstop.size(); i++) {//if could directly go to the destination
                 if (nextstop.get(i).equals(end)) {
                     finalway=stopinfo.get(i);
                     directway=true;
@@ -136,14 +128,14 @@ public class N implements Runnable {
 
             }
 
-            if (directway) {
+            if (directway) {//just send the routine back to browser
                 String response = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
                     + finalway.length() + "\n\n" + finalway;
             os.write(response.getBytes());
 
             s.close();
             } else {
-                // 1.The first station, if get the request from browser which contains a
+                // 1.The first station, get the request from browser which contains a
                 // terminal. And the start port and terminal name to the routine and send to its
                 // neighour.
                 InetAddress loc = InetAddress.getLocalHost();
@@ -153,29 +145,31 @@ public class N implements Runnable {
                     for (int j = 0; j < neinfo.size(); j++) {
                         DatagramPacket packet = new DatagramPacket(routine.getBytes(), routine.getBytes().length, loc,
                                 Integer.parseInt(neinfo.get(j)));
-    
+
                         socket.send(packet);
-    
+                        
+
                     }
                     System.out.println(routine);
                 }
                 initialstop=true;
                 socket.close();
-                
+
             }
-            while (!findway) {
-                TimeUnit.SECONDS.sleep(5);
+            byte[] bytes = new byte[1024];
+            TimeUnit.SECONDS.sleep(3);//wait for three minutes
+            while (!findway) {//if not find a way return no way
                 String noway="there is no way";
                 String response = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
                 + noway.length() + "\n\n" + noway;
                 os.write(response.getBytes());
 
                 s.close();
-
             }
-            String reply = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
+            //if find the way, return the finalway
+            String response = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
                     + finalway.length() + "\n\n" + finalway;
-            os.write(reply.getBytes());
+            os.write(response.getBytes());
 
             s.close();
 
@@ -184,16 +178,15 @@ public class N implements Runnable {
 
     }
 
-    public void UDP() throws Exception {
+    public void UDP() throws Exception {//run udp
         InetAddress loc = InetAddress.getLocalHost();
         DatagramSocket socket = new DatagramSocket(udport);
         boolean Urgo = true;
-        while (Urgo) {
+        while (Urgo) {//keep going
             DatagramPacket packetr = new DatagramPacket(new byte[1024], 1024);
 
             socket.receive(packetr);
 
-            //byte[] arr = packetr.getData();
             routine = new String(packetr.getData(),0,packetr.getLength());// get data set as routine
             String[] arrive = routine.split(",");
             // if this is the finalway that start at a time
@@ -201,7 +194,6 @@ public class N implements Runnable {
                 finalway = finalway+routine;
                 findway = true;
                 System.out.println("find the way");
-                System.out.println(findway);
 
                 continue;
             } else {
@@ -219,16 +211,16 @@ public class N implements Runnable {
                 if (nextstop.get(i).equals(end)) {
                     getend=true;
                 } 
-                
+
             }
-            String[]check=routine.split(",");
+            String[]check=routine.split(",");//check if the station has been passed, check the routine except the arrivestop and first two important information
             for (int i = 2; i < check.length-1; i++) {
                 if (check[i].equals(name)) {
                     havepassed=true;
                 }
             }
 
-            //System.out.println(arrivestop+"length="+arrivestop.length()+name+"length="+name.length());
+
 
             // 2.if the stop has already in the routine, just abandon.
             if (havepassed||initialstop) {
@@ -275,6 +267,7 @@ public class N implements Runnable {
 
                         socket.send(packet);
                     }
+
                 }
             }
 
@@ -285,7 +278,7 @@ public class N implements Runnable {
 
     public static void main(String[] args) {
 
-        N station = new N(args);
+        M station = new M(args);
         Thread tcp = new Thread(station);
         Thread udp = new Thread(station);
         tcp.start();
