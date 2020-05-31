@@ -19,6 +19,8 @@ print(ath, atm)
 
 def getns():#read the timetable to fufill the stopinfo and nextstopl
         f = open('tt-'+Name)
+        nextstopl.clear()
+        stopinfo.clear()
         line = f.readlines()
         newline = line[1:]
         for line in newline:
@@ -29,8 +31,6 @@ def getns():#read the timetable to fufill the stopinfo and nextstopl
            timeh = int(timepiece[0])
            timem = int(timepiece[1])
            nextstop = part[-1]
-           global ath
-           global atm
            if timeh > ath or (timeh == ath and timem >= atm):
               stopinfo.append(line)
               nextstopl.append(nextstop)

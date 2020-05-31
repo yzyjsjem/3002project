@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.io.*;
 import java.net.*;
 
@@ -166,15 +167,14 @@ public class n implements Runnable {
             }
             byte[] bytes = new byte[1024];
             while (!findway) {
-               System.out.println("im waiting");
-               /*
-              //if (count>10) {
-                String response = "HTTP/1.1 404 Not Found \n" + "Content-Type: text/html\n" + "Content-Length: 29" + "\n\n"
-                        + "<h1>No way!</h1>";
-        os.write(response.getBytes());
-        s.close();
-               //}
-               */
+                TimeUnit.SECONDS.sleep(5);
+                String noway="there is no way";
+                String response = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
+                + noway.length() + "\n\n" + noway;
+                os.write(response.getBytes());
+
+                s.close();
+
             }
             String response = "HTTP/1.1 200 ok \n" + "Content-Type: text/html\n" + "Content-Length: "
                     + finalway.length() + "\n\n" + finalway;
